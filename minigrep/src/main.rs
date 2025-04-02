@@ -1,13 +1,16 @@
-use std::env;
+use std::{env, process};
+
+use minigrep::{parse_config, run};
 
 fn main() {
     let args: Vec<String> = env::args().collect();
-    
-    if args.len() < 3 {
-        panic!("Incorrect usage, try: minigrep searchString file.txt")
-    }
+    let (query, file_path) = parse_config(&args).unwrap_or_else(|err| {
+        println!("Problem parsing arguments: {}", err);
+        process::exit(1);
+    });
 
-    let query = &args[1];
-    let file_path = &args[2];
-    println!("Searching {} for {}...", file_path, query);
+    if let Err(e) = run(query, file_path) {
+        println!("Application error: {e}");
+        process::exit(1);
+    }
 }
