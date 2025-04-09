@@ -26,15 +26,15 @@ fn handle_connection(mut stream: TcpStream) {
     let response: String;
 
     if request_line.len() != 3 {
-        response = create_response("500", "500.html")
+        response = create_response("500", "/500.html");
     } else {
         let method = request_line[0];
         let file_path = request_line[1];
 
-        if method == "GET" && (file_path == "/" || file_path=="/hello.html") {
-            response = create_response("200", "hello.html");
+        if method == "GET" && (file_path == "/") {
+            response = create_response("200", "/hello.html");
         } else {
-            response = create_response("404", "404.html");
+            response = create_response("200", file_path);
         }
     }
 
@@ -45,17 +45,23 @@ fn handle_connection(mut stream: TcpStream) {
 }
 
 fn create_response(status_code: &str, file_path: &str) -> String {
-    let status_line = format!("HTTP/1.1 {status_code} OK");
+    let mut status_line = format!("HTTP/1.1 {status_code} OK");
     
-    let file_path = format!("static/{file_path}");
-    let contents = fs::read_to_string(file_path).unwrap_or_else(|_| {
-        create_response("404", "404.html")
-    });
+    let formatted_path = format!("static{file_path}");
+    match fs::exists(&formatted_path) {
+        Ok(true) => {
+            let contents = fs::read_to_string(&formatted_path).unwrap_or_else(|_| { 
+                status_line = "HTTP/1.1 404 OK".to_string();
+                fs::read_to_string("static/404.html").expect("404 file must exist")
+            });
+            let length = contents.len();
+            let content_type = "text/html";
+            let headers =
+                format!("Content-Type: {content_type}\r\nContent-Length: {length}");
+        
+            format!("{status_line}\r\n{headers}\r\n\r\n{contents}")
+        },
+        _ => create_response("404", "/404.html")
+    }
 
-    let length = contents.len();
-    let content_type = "text/html";
-    let headers =
-        format!("Content-Type: {content_type}\r\nContent-Length: {length}");
-
-    format!("{status_line}\r\n{headers}\r\n\r\n{contents}")
 }
