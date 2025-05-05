@@ -1,11 +1,13 @@
 use std::fs;
 
+use serde::Serialize;
 use sqlite::Connection;
 
 pub struct QueryTodo {
     pub incomplete_tasks_only: bool,
 }
 
+#[derive(Serialize)]
 pub struct Task {
     pub id: i64,
     pub description: String,
@@ -22,10 +24,8 @@ impl Dao {
         }
 
         let db_path = if &db_path[db_path.len() - 1..] != "/" {
-            println!("perm db");
             db_path.to_string() + "/sqlite.db"
         } else {
-            println!("perm db");
             db_path.to_string() + "sqlite.db"
         };
 
