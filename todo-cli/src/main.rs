@@ -63,17 +63,11 @@ pub fn list_tasks(dao: &lib::Dao, query_object: lib::QueryTodo) {
 pub fn add_task(dao: &lib::Dao) {
     let task = get_task_from_cli();
 
-    let added = dao.add_task(task);
+    let new_task_id = dao.add_task(task.as_str());
 
-    if added {
-        list_tasks(
-            dao,
-            lib::QueryTodo {
-                incomplete_tasks_only: true,
-            },
-        );
-    } else {
-        println!("Failed to add task")
+    match new_task_id {
+        Some(id) => println!("Added task with id {}", id),
+        _ => println!("Failed to add task"),
     }
 }
 

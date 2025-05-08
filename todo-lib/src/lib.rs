@@ -1,20 +1,20 @@
-use std::fs;
+use std::{fs, sync::Mutex};
 
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use sqlite::Connection;
 
 pub struct QueryTodo {
     pub incomplete_tasks_only: bool,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 pub struct Task {
     pub id: i64,
     pub description: String,
 }
 
 pub struct Dao {
-    connection: Connection,
+    connection: Mutex<Connection>,
 }
 
 impl Dao {
@@ -40,13 +40,16 @@ impl Dao {
             )
             .expect("Failed to initialize db");
 
-        Dao { connection }
+        Dao {
+            connection: Mutex::new(connection),
+        }
     }
 
     pub fn get_tasks(&self, query_object: QueryTodo) -> Vec<Task> {
         let query = "SELECT * FROM tasks WHERE completed = ?";
-        let mut statement = self
-            .connection
+        let connection = self.connection.lock().expect("Failed to get db connection");
+
+        let mut statement = connection
             .prepare(query)
             .expect("Select query malformatted");
         statement
@@ -75,23 +78,40 @@ impl Dao {
             .collect()
     }
 
-    pub fn add_task(&self, task: String) -> bool {
+    pub fn add_task(&self, task: &str) -> Option<i64> {
         let query = "INSERT INTO tasks (description) VALUES (?)";
-        let mut statement = self
-            .connection
+        let connection = self.connection.lock().expect("Failed to get db connection");
+        let mut statement = connection
             .prepare(query)
             .expect("Insert query malformatted");
-        statement
-            .bind((1, task.as_str()))
-            .expect("Failed to bind query");
+        statement.bind((1, task)).expect("Failed to bind query");
 
-        statement.next().is_ok()
+        let result = statement.next();
+
+        match result {
+            Ok(sqlite::State::Done) => {
+                let last_id_query = "SELECT last_insert_rowid()";
+                let mut last_id_statement = connection
+                    .prepare(last_id_query)
+                    .expect("Failed to prepare last_insert_rowid query");
+                if let Ok(sqlite::State::Row) = last_id_statement.next() {
+                    Some(
+                        last_id_statement
+                            .read::<i64, _>(0)
+                            .expect("Unable to get last id"),
+                    )
+                } else {
+                    None
+                }
+            }
+            _ => None,
+        }
     }
 
     pub fn finish_task(&self, id: i64) -> bool {
         let query = "UPDATE tasks SET completed = 1 WHERE id = ?";
-        let mut statement = self
-            .connection
+        let connection = self.connection.lock().expect("Failed to get db connection");
+        let mut statement = connection
             .prepare(query)
             .expect("Update query malformatted");
         statement.bind((1, id)).expect("Failed to bind query");
@@ -101,8 +121,8 @@ impl Dao {
 
     pub fn delete_task(&self, id: i64) -> bool {
         let query = "DELETE FROM tasks WHERE id = ?";
-        let mut statement = self
-            .connection
+        let connection = self.connection.lock().expect("Failed to get db connection");
+        let mut statement = connection
             .prepare(query)
             .expect("Delete query malformatted");
         statement.bind((1, id)).expect("Failed to bind query");
@@ -112,18 +132,18 @@ impl Dao {
 
     pub fn reset_db(&self) -> bool {
         let query = "DELETE FROM tasks";
-        self.connection.execute(query).is_ok()
+        let connection = self.connection.lock().expect("Failed to get db connection");
+        connection.execute(query).is_ok()
     }
 }
+
+unsafe impl Send for Dao {}
+unsafe impl Sync for Dao {}
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use serial_test::serial;
-
-    struct TestContext {
-        dao: Dao,
-    }
 
     fn setup() -> Dao {
         let dao = Dao::new("target/test");
@@ -152,7 +172,7 @@ mod tests {
     fn test_db_one_add() {
         let dao = setup();
 
-        dao.add_task("test the lib".to_string());
+        dao.add_task("test the lib");
 
         let incomplete_tasks = dao.get_tasks(QueryTodo {
             incomplete_tasks_only: true,
@@ -170,9 +190,12 @@ mod tests {
     fn test_db_three_add() {
         let dao = setup();
 
-        dao.add_task("test the lib".to_string());
-        dao.add_task("test it again".to_string());
-        dao.add_task("pet the dog".to_string());
+        let id = dao.add_task("test the lib").unwrap();
+        assert_eq!(1, id);
+        let id = dao.add_task("test it again").unwrap();
+        assert_eq!(2, id);
+        let id = dao.add_task("pet the dog").unwrap();
+        assert_eq!(3, id);
 
         let incomplete_tasks = dao.get_tasks(QueryTodo {
             incomplete_tasks_only: true,
@@ -190,9 +213,9 @@ mod tests {
     fn test_db_finish_task() {
         let dao = setup();
 
-        dao.add_task("test the lib".to_string());
-        dao.add_task("test it again".to_string());
-        dao.add_task("pet the dog".to_string());
+        dao.add_task("test the lib");
+        dao.add_task("test it again");
+        dao.add_task("pet the dog");
         dao.finish_task(2);
         dao.finish_task(3);
 
@@ -212,10 +235,10 @@ mod tests {
     fn test_db_delete_task() {
         let dao = setup();
 
-        dao.add_task("test the lib".to_string());
-        dao.add_task("test it again".to_string());
-        dao.add_task("pet the dog".to_string());
-        dao.add_task("delete me too".to_string());
+        dao.add_task("test the lib");
+        dao.add_task("test it again");
+        dao.add_task("pet the dog");
+        dao.add_task("delete me too");
         dao.finish_task(2);
         dao.finish_task(3);
         dao.delete_task(2);
@@ -237,10 +260,10 @@ mod tests {
     fn test_reset_db() {
         let dao = setup();
 
-        dao.add_task("test the lib".to_string());
-        dao.add_task("test it again".to_string());
-        dao.add_task("pet the dog".to_string());
-        dao.add_task("delete me too".to_string());
+        dao.add_task("test the lib");
+        dao.add_task("test it again");
+        dao.add_task("pet the dog");
+        dao.add_task("delete me too");
         dao.finish_task(2);
         dao.finish_task(3);
         dao.delete_task(2);
