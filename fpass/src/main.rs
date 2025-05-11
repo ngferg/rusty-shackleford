@@ -74,7 +74,7 @@ fn get_action_from_cli(print_menu: bool) -> Actions {
         print!("(n)ew password\r\n");
     }
 
-    if let Event::Key(key_event) = event::read().expect("cannot ready key") {
+    if let Event::Key(key_event) = event::read().expect("cannot read key") {
 
         match key_event.code {
             KeyCode::Char('q') | KeyCode::Esc => Actions::QUIT,
