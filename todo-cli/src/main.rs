@@ -32,6 +32,7 @@ fn main() {
             ),
             "add" => add_task(&dao),
             "finish" => finish_task(&dao),
+            "unfinish" => unfinish_task(&dao),
             "delete" => delete_task(&dao),
             "reset" => reset_db(&dao),
             "exit" => {
@@ -91,6 +92,29 @@ pub fn finish_task(dao: &lib::Dao) {
         );
     } else {
         println!("Failed to finish task");
+    }
+}
+
+pub fn unfinish_task(dao: &lib::Dao) {
+    list_tasks(
+        dao,
+        lib::QueryTodo {
+            incomplete_tasks_only: false,
+        },
+    );
+
+    let id = get_id_from_cli();
+    let updated = dao.unfinish_task(id);
+
+    if updated {
+        list_tasks(
+            dao,
+            lib::QueryTodo {
+                incomplete_tasks_only: true,
+            },
+        );
+    } else {
+        println!("Failed to unfinish task");
     }
 }
 
@@ -162,5 +186,5 @@ fn get_id_from_cli() -> i64 {
 }
 
 pub fn print_options() {
-    println!("Please enter a command (list, list-finished, add, finish, delete, reset, exit): ");
+    println!("Please enter a command (list, list-finished, add, finish, unfinish, delete, reset, exit): ");
 }
