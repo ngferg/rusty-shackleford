@@ -61,7 +61,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"description\": \"Finish this task\"\n}",
+					"raw": "{\n    \"description\": \"Delete this task\"\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -123,14 +123,69 @@
 					}
 				},
 				"url": {
-					"raw": "localhost:3000/tasks/2",
+					"raw": "localhost:3000/tasks/1",
 					"host": [
 						"localhost"
 					],
 					"port": "3000",
 					"path": [
 						"tasks",
-						"2"
+						"1"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete task",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3000/tasks/3",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"tasks",
+						"3"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "delete all tasks",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "localhost:3000/tasks",
+					"host": [
+						"localhost"
+					],
+					"port": "3000",
+					"path": [
+						"tasks"
 					]
 				}
 			},
