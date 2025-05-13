@@ -186,5 +186,7 @@ fn get_id_from_cli() -> i64 {
 }
 
 pub fn print_options() {
-    println!("Please enter a command (list, list-finished, add, finish, unfinish, delete, reset, exit): ");
+    println!(
+        "Please enter a command (list, list-finished, add, finish, unfinish, delete, reset, exit): "
+    );
 }

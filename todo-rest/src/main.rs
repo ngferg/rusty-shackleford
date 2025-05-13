@@ -23,7 +23,7 @@ async fn main() {
         )
         .route(
             "/tasks/{id}",
-            put(put_controller::finish_task).delete(delete_controller::delete_task),
+            put(put_controller::update_task).delete(delete_controller::delete_task),
         )
         .with_state(dao);
 
