@@ -119,6 +119,17 @@ impl Dao {
         statement.next().is_ok()
     }
 
+    pub fn unfinish_task(&self, id: i64) -> bool {
+        let query = "UPDATE tasks SET completed = 0 WHERE id = ?";
+        let connection = self.connection.lock().expect("Failed to get db connection");
+        let mut statement = connection
+            .prepare(query)
+            .expect("Update query malformatted");
+        statement.bind((1, id)).expect("Failed to bind query");
+
+        statement.next().is_ok()
+    }
+
     pub fn delete_task(&self, id: i64) -> bool {
         let query = "DELETE FROM tasks WHERE id = ?";
         let connection = self.connection.lock().expect("Failed to get db connection");
@@ -228,6 +239,29 @@ mod tests {
 
         assert_eq!(1, incomplete_tasks.len());
         assert_eq!(2, complete_tasks.len());
+    }
+
+    #[test]
+    #[serial]
+    fn test_db_unfinish_task() {
+        let dao = setup();
+
+        dao.add_task("test the lib");
+        dao.add_task("test it again");
+        dao.add_task("pet the dog");
+        dao.finish_task(2);
+        dao.finish_task(3);
+        dao.unfinish_task(3);
+
+        let incomplete_tasks = dao.get_tasks(QueryTodo {
+            incomplete_tasks_only: true,
+        });
+        let complete_tasks = dao.get_tasks(QueryTodo {
+            incomplete_tasks_only: false,
+        });
+
+        assert_eq!(2, incomplete_tasks.len());
+        assert_eq!(1, complete_tasks.len());
     }
 
     #[test]
