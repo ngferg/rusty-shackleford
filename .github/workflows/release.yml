@@ -35,17 +35,19 @@ jobs:
           sudo apt-get install -y libgtk-3-dev
 
       - name: Build Release
-        run: cargo build --release --bin todo-gui
+        run: |
+          cd todo-gui
+          cargo build --release --bin todo-gui
 
       - name: Rename binary
         shell: bash
         run: |
-          cd target/release
+          cd todo-gui/target/release
           cp ${{ matrix.artifact_name }} ${{ matrix.asset_name }}
 
       - name: Upload Release Asset
         uses: softprops/action-gh-release@v1
         with:
-          files: target/release/${{ matrix.asset_name }}
+          files: todo-gui/target/release/${{ matrix.asset_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
