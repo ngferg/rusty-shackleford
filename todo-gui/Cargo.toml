@@ -1,0 +1,9 @@
+[package]
+name = "todo-gui"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+egui = "0.31.1"
+eframe = "0.26.2"
+todo-lib = { path = "../todo-lib" }
