@@ -18,9 +18,6 @@ jobs:
           - os: macos-latest
             artifact_name: todo-gui
             asset_name: todo-gui-macos
-          - os: windows-latest
-            artifact_name: todo-gui.exe
-            asset_name: todo-gui-windows.exe
 
     steps:
       - uses: actions/checkout@v4
