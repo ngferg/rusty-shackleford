@@ -1,4 +1,5 @@
 use todo_lib as lib;
+use todo_lib::Dao;
 
 fn main() {
     let home_dir = std::env::var("HOME").expect("HOME environment variable not set");
@@ -33,6 +34,7 @@ fn main() {
             "add" => add_task(&dao),
             "finish" => finish_task(&dao),
             "unfinish" => unfinish_task(&dao),
+            "update-description" => update_description(&dao),
             "delete" => delete_task(&dao),
             "reset" => reset_db(&dao),
             "exit" => {
@@ -46,7 +48,7 @@ fn main() {
     }
 }
 
-pub fn list_tasks(dao: &lib::Dao, query_object: lib::QueryTodo) {
+pub fn list_tasks(dao: &Dao, query_object: lib::QueryTodo) {
     println!(
         "{} Tasks:",
         if query_object.incomplete_tasks_only {
@@ -61,7 +63,7 @@ pub fn list_tasks(dao: &lib::Dao, query_object: lib::QueryTodo) {
         .for_each(|task| println!("{}: {}", task.id, task.description));
 }
 
-pub fn add_task(dao: &lib::Dao) {
+pub fn add_task(dao: &Dao) {
     let task = get_task_from_cli();
 
     let new_task_id = dao.add_task(task.as_str());
@@ -72,7 +74,7 @@ pub fn add_task(dao: &lib::Dao) {
     }
 }
 
-pub fn finish_task(dao: &lib::Dao) {
+pub fn finish_task(dao: &Dao) {
     list_tasks(
         dao,
         lib::QueryTodo {
@@ -95,7 +97,7 @@ pub fn finish_task(dao: &lib::Dao) {
     }
 }
 
-pub fn unfinish_task(dao: &lib::Dao) {
+pub fn unfinish_task(dao: &Dao) {
     list_tasks(
         dao,
         lib::QueryTodo {
@@ -118,42 +120,34 @@ pub fn unfinish_task(dao: &lib::Dao) {
     }
 }
 
-pub fn delete_task(dao: &lib::Dao) {
-    list_tasks(
-        dao,
-        lib::QueryTodo {
-            incomplete_tasks_only: true,
-        },
-    );
-    list_tasks(
-        dao,
-        lib::QueryTodo {
-            incomplete_tasks_only: false,
-        },
-    );
+fn update_description(dao: &Dao) {
+    list_all_tasks(dao);
+    
+    let id = get_id_from_cli();
+    let desc = get_task_from_cli();
+    let updated = dao.update_description(id, desc.as_str());
+
+    if updated {
+        list_all_tasks(dao);
+    } else {
+        println!("Failed to update task description");
+    }
+}
+
+pub fn delete_task(dao: &Dao) {
+    list_all_tasks(dao);
 
     let id = get_id_from_cli();
     let deleted = dao.delete_task(id);
 
     if deleted {
-        list_tasks(
-            dao,
-            lib::QueryTodo {
-                incomplete_tasks_only: true,
-            },
-        );
-        list_tasks(
-            dao,
-            lib::QueryTodo {
-                incomplete_tasks_only: false,
-            },
-        );
+        list_all_tasks(dao);
     } else {
         println!("Failed to delete task");
     }
 }
 
-pub fn reset_db(dao: &lib::Dao) {
+pub fn reset_db(dao: &Dao) {
     let reset = dao.reset_db();
 
     if reset {
@@ -185,8 +179,23 @@ fn get_id_from_cli() -> i64 {
     line.trim().parse().unwrap_or(0)
 }
 
+fn list_all_tasks(dao: &Dao) {
+    list_tasks(
+        dao,
+        lib::QueryTodo {
+            incomplete_tasks_only: true,
+        },
+    );
+    list_tasks(
+        dao,
+        lib::QueryTodo {
+            incomplete_tasks_only: false,
+        },
+    );
+}
+
 pub fn print_options() {
     println!(
-        "Please enter a command (list, list-finished, add, finish, unfinish, delete, reset, exit): "
+        "Please enter a command (list, list-finished, add, finish, unfinish, update-description, delete, reset, exit): "
     );
 }

@@ -129,6 +129,18 @@ impl Dao {
 
         statement.next().is_ok()
     }
+    
+    pub fn update_description(&self, id: i64, new_description: &str) -> bool {
+        let query = "UPDATE tasks SET description = ? WHERE id = ?";
+        let connection = self.connection.lock().expect("Failed to get db connection");
+        let mut statement = connection
+            .prepare(query)
+            .expect("Update query malformatted");
+        statement.bind((1, new_description)).expect("Failed to bind query");
+        statement.bind((2, id)).expect("Failed to bind query");
+
+        statement.next().is_ok()
+    }
 
     pub fn delete_task(&self, id: i64) -> bool {
         let query = "DELETE FROM tasks WHERE id = ?";
@@ -287,6 +299,25 @@ mod tests {
 
         assert_eq!(1, incomplete_tasks.len());
         assert_eq!(1, complete_tasks.len());
+    }
+
+    #[test]
+    #[serial]
+    fn test_db_update_task_des() {
+        let dao = setup();
+
+        dao.add_task("this is old");
+        let incomplete_tasks = dao.get_tasks(QueryTodo {
+            incomplete_tasks_only: true,
+        });
+        assert_eq!("this is old".to_string(), incomplete_tasks[0].description);
+
+        let updated = dao.update_description(1, "this is new");
+        assert!(updated);
+        let incomplete_tasks = dao.get_tasks(QueryTodo {
+            incomplete_tasks_only: true,
+        });
+        assert_eq!("this is new".to_string(), incomplete_tasks[0].description);
     }
 
     #[test]
