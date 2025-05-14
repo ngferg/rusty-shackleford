@@ -129,14 +129,16 @@ impl Dao {
 
         statement.next().is_ok()
     }
-    
+
     pub fn update_description(&self, id: i64, new_description: &str) -> bool {
         let query = "UPDATE tasks SET description = ? WHERE id = ?";
         let connection = self.connection.lock().expect("Failed to get db connection");
         let mut statement = connection
             .prepare(query)
             .expect("Update query malformatted");
-        statement.bind((1, new_description)).expect("Failed to bind query");
+        statement
+            .bind((1, new_description))
+            .expect("Failed to bind query");
         statement.bind((2, id)).expect("Failed to bind query");
 
         statement.next().is_ok()

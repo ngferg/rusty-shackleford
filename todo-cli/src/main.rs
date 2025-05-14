@@ -122,7 +122,7 @@ pub fn unfinish_task(dao: &Dao) {
 
 fn update_description(dao: &Dao) {
     list_all_tasks(dao);
-    
+
     let id = get_id_from_cli();
     let desc = get_task_from_cli();
     let updated = dao.update_description(id, desc.as_str());

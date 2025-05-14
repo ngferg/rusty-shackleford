@@ -1,6 +1,6 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="todo cargo fmt" type="ShConfigurationType">
-    <option name="SCRIPT_TEXT" value="cd todo-lib; cargo fmt &amp;; cd ../todo-cli; cargo fmt &amp;; cd ../todo-rest; cargo fmt &amp;;" />
+    <option name="SCRIPT_TEXT" value="cd todo-lib; cargo fmt &amp;; cd ../todo-cli; cargo fmt &amp;; cd ../todo-rest; cargo fmt &amp;; cd ../todo-gui; cargo fmt &amp;" />
     <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
     <option name="SCRIPT_PATH" value="" />
     <option name="SCRIPT_OPTIONS" value="" />

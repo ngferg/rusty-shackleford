@@ -35,21 +35,24 @@ pub async fn update_task(
 
 fn update_description(id: i64, payload: Value, dao: &lib::Dao) -> (StatusCode, Json<Value>) {
     let new_description = payload.get("description");
-    match new_description { 
+    match new_description {
         Some(new_description) => {
             let updated = dao.update_description(id, new_description.as_str().unwrap());
             match updated {
-                true => (StatusCode::OK, Json(json!({"msg": "Task description updated"}))),
+                true => (
+                    StatusCode::OK,
+                    Json(json!({"msg": "Task description updated"})),
+                ),
                 false => (
                     StatusCode::INTERNAL_SERVER_ERROR,
                     Json(json!({"error": "Failed to update task"})),
                 ),
             }
-        },
+        }
         _ => (
             StatusCode::UNPROCESSABLE_ENTITY,
             Json(json!({"error": "Field \"description\", is required to update description"})),
-        )
+        ),
     }
 }
 
