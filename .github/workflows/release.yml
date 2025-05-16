@@ -42,6 +42,13 @@ jobs:
           cd todo-gui/target/release
           cp ${{ matrix.artifact_name }} ${{ matrix.asset_name }}
 
+      - name: Create Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create ${GITHUB_REF#refs/tags/} --notes "Release ${GITHUB_REF#refs/tags/}" --title "${GITHUB_REF#refs/tags/}"
+
       - name: Upload Release Asset
         shell: bash
         env:
