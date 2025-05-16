@@ -43,8 +43,8 @@ jobs:
           cp ${{ matrix.artifact_name }} ${{ matrix.asset_name }}
 
       - name: Upload Release Asset
-        uses: softprops/action-gh-release@v1
-        with:
-          files: todo-gui/target/release/${{ matrix.asset_name }}
+        shell: bash
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release upload ${GITHUB_REF#refs/tags/} todo-gui/target/release/${{ matrix.asset_name }}
