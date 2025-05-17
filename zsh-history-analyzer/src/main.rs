@@ -43,7 +43,7 @@ impl ZshHist {
 
         cmds.iter()
             .filter(|(_, count)| *count > &10)
-            .for_each(|(cmd, count)| println!("times {}: command: {}", count, cmd));
+            .for_each(|(cmd, count)| println!("times {}: {:?}: {}", count, report_type, cmd));
     }
 }
 
