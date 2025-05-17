@@ -18,9 +18,8 @@ impl ZshHist {
         let history_file = format!("{home_dir}/.zsh_history");
         let history = std::fs::read(history_file).expect("Failed to read zsh history file");
         let history = String::from_utf8_lossy(&history);
-        let lines = history.lines();
 
-        lines.for_each(|cmd| {
+        history.lines().for_each(|cmd| {
             let cmd_count = zsh_history.full_command_hist.get(cmd).unwrap_or(&0).clone();
             zsh_history.full_command_hist.insert(cmd.to_string(), cmd_count + 1);
             let program = cmd.split(" ").next().unwrap_or("");
