@@ -1,9 +1,5 @@
 use anyhow::Result; // Automatically handle the error types
-use opencv::{
-    prelude::*,
-    videoio,
-    highgui
-}; // Note, the namespace of OpenCV is changed (to better or worse). It is no longer one enormous.
+use opencv::{highgui, prelude::*, videoio}; // Note, the namespace of OpenCV is changed (to better or worse). It is no longer one enormous.
 
 fn main() -> Result<()> {
     // // Open a GUI window
@@ -19,16 +15,24 @@ fn main() -> Result<()> {
 
     // Read the camera and display in the window
     loop {
-            cam.read(&mut frame)?;
+        cam.read(&mut frame)?;
 
-            for y in (0..COL_LEN).step_by(PIXEL_STEP) {
-                for x in (1..ROW_LEN).step_by(PIXEL_STEP) {
-                    // print!("({:0>4},{:0>4})", x, y);
-                    // print!("{:0>8},", x*3+y*ROW_LEN*3);
-                    print!("{}", map_pixel_to_ascii(frame.data_bytes()?.get(x*3+y*ROW_LEN*3).unwrap_or(&0)))
-                }
-                println!(" ");
+        for y in (0..COL_LEN).step_by(PIXEL_STEP) {
+            for x in (1..ROW_LEN).step_by(PIXEL_STEP) {
+                // print!("({:0>4},{:0>4})", x, y);
+                // print!("{:0>8},", x*3+y*ROW_LEN*3);
+                print!(
+                    "{}",
+                    map_pixel_to_ascii(
+                        frame
+                            .data_bytes()?
+                            .get(x * 3 + y * ROW_LEN * 3)
+                            .unwrap_or(&0)
+                    )
+                )
             }
+            println!(" ");
+        }
     }
     Ok(())
 }
@@ -50,6 +54,6 @@ fn map_pixel_to_ascii(pixel: &u8) -> char {
         192..208 => '&',
         208..224 => '$',
         224..240 => '£',
-        240.. => '@'
+        240.. => '@',
     }
 }
