@@ -2,17 +2,25 @@ use std::collections::HashMap;
 use std::io;
 
 fn main() {
-    println!("Enter your text: ");
+    loop {
+        println!("Enter your text: ");
 
-    let mut input = String::new();
+        let mut input = String::new();
 
-    io::stdin()
-        .read_line(&mut input)
-        .expect("Failed to read line");
+        io::stdin()
+            .read_line(&mut input)
+            .expect("Failed to read line");
 
-    let morse_string = get_morse_string(input);
+        if input.starts_with(".") || input.starts_with("_") {
+            let alpha_string = get_alpha_string(input);
 
-    println!("Morse:\n{}", morse_string);
+            println!("Decoded:\n{}", alpha_string)
+        } else {
+            let morse_string = get_morse_string(input);
+
+            println!("Morse:\n{}", morse_string);
+        }
+    }
 }
 
 fn get_morse_string(input: String) -> String {
@@ -54,8 +62,26 @@ fn get_alpha_to_morse_map() -> HashMap<char, String> {
         ('x', String::from("_.._ ")),
         ('y', String::from("_.__ ")),
         ('z', String::from("__.. ")),
-        (' ', String::from("\n")),
+        (' ', String::from("| ")),
     ])
+}
+
+fn get_alpha_string(input: String) -> String {
+    let alpha_map = get_morse_to_alpha_map();
+
+    input.trim()
+        .to_lowercase()
+        .split(" ")
+        .into_iter()
+        .map(|s| alpha_map.get(s).unwrap_or(&' '))
+        .collect()
+}
+
+fn get_morse_to_alpha_map() -> HashMap<String, char> {
+    get_alpha_to_morse_map()
+        .iter()
+        .map(|(k,v)| (v.clone().trim().to_string(), k.clone()))
+        .collect()
 }
 
 #[cfg(test)]
@@ -65,9 +91,15 @@ mod tests {
     #[test]
     fn test_hello_world() {
         let morse = get_morse_string("hello world".to_string());
-        assert_eq!(".... . ._.. ._.. ___ \n.__ ___ ._. ._.. _.. ", morse);
+        assert_eq!(".... . ._.. ._.. ___ | .__ ___ ._. ._.. _.. ", morse);
     }
 
+    #[test]
+    fn test_decode() {
+        let alpha = get_alpha_string(".... . ._.. ._.. ___ | _ .... . ._. .".to_string());
+        assert_eq!("hello there", alpha);
+    }
+    
     #[test]
     fn test_case_insensitivity() {
         let morse1 = get_morse_string("hOwDy".to_string());
