@@ -26,7 +26,8 @@ fn main() {
 fn get_morse_string(input: String) -> String {
     let morse_map = get_alpha_to_morse_map();
 
-    input.trim()
+    input
+        .trim()
         .to_lowercase()
         .chars()
         .into_iter()
@@ -69,7 +70,8 @@ fn get_alpha_to_morse_map() -> HashMap<char, String> {
 fn get_alpha_string(input: String) -> String {
     let alpha_map = get_morse_to_alpha_map();
 
-    input.trim()
+    input
+        .trim()
         .to_lowercase()
         .split(" ")
         .into_iter()
@@ -80,7 +82,7 @@ fn get_alpha_string(input: String) -> String {
 fn get_morse_to_alpha_map() -> HashMap<String, char> {
     get_alpha_to_morse_map()
         .iter()
-        .map(|(k,v)| (v.clone().trim().to_string(), k.clone()))
+        .map(|(k, v)| (v.clone().trim().to_string(), k.clone()))
         .collect()
 }
 
@@ -99,7 +101,7 @@ mod tests {
         let alpha = get_alpha_string(".... . ._.. ._.. ___ | _ .... . ._. .".to_string());
         assert_eq!("hello there", alpha);
     }
-    
+
     #[test]
     fn test_case_insensitivity() {
         let morse1 = get_morse_string("hOwDy".to_string());
