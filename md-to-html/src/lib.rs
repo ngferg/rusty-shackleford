@@ -57,7 +57,7 @@ fn build_html_body(md_lines: Vec<&str>) -> String {
                 while chars.next() == Some('#') && h < 6 {
                     h += 1;
                 }
-                format!("<h{}>{}</h{}>\n", h, line[h..].to_string().trim(), h).to_string()
+                format!("<h{}>{}</h{}>\n", h, line[h..].to_string().trim(), h)
             }
             _ if line.starts_with("---") => String::from("<hr/>\n"),
             _ if line.starts_with("+ ") | line.starts_with("* ") | line.starts_with("- ") => {
