@@ -48,6 +48,8 @@ fn convert_md_to_html(file_name: &String) -> Result<String, MDToHtmlError> {
     html.push_str(file_name.replace(".md", "").as_str());
     html.push_str("</title>\n");
     html.push_str("</head>\n");
+    html.push_str("<body>\n");
+    html.push_str("</body>\n");
     html.push_str("</html>\n");
 
     Ok(html)
