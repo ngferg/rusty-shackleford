@@ -61,12 +61,12 @@ fn build_html_body(md_lines: Vec<&str>) -> String {
             }
             _ if line.starts_with("---") => String::from("<hr/>\n"),
             _ if line.starts_with("+ ") | line.starts_with("* ") | line.starts_with("- ") => {
-                format!("<ul><li>{}</li></ul>\n", line[1..].to_string().trim()) // todo: deal with tab levels
+                format!("<ul>\n<li>{}</li>\n</ul>\n", line[1..].to_string().trim()) // todo: deal with tab levels
             }
             _ => format!("<p>{line}</p>\n"),
         })
         .collect();
 
-    let html_body = html_body.replace("</ul>\n<ul>", "\n");
+    let html_body = html_body.replace("</ul>\n<ul>\n", "");
     html_body
 }
