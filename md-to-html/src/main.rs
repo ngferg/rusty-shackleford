@@ -1,4 +1,3 @@
-use clap::ArgAction;
 use clap::Parser;
 use std::error::Error;
 use std::fs::File;
