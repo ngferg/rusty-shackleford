@@ -1,11 +1,14 @@
+use clap::ArgAction;
 use clap::Parser;
 use std::error::Error;
+use std::fs::File;
+use std::io::Write;
 use std::{fmt, fs};
 
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 struct Args {
-    #[arg(short, long)]
+    #[arg(long)]
     file_name: String,
 }
 
@@ -29,7 +32,13 @@ fn main() {
     println!("Looking at {}", file_name);
 
     match convert_md_to_html(&file_name) {
-        Ok(s) => println!("{}", s),
+        Ok(s) => {
+            println!("{}", s);
+            let mut file = File::create(format!("target/{}", file_name.replace(".md", ".html")))
+                .expect("Unable to write output file");
+            file.write_all(s.as_bytes())
+                .expect("Unable to write output file");
+        }
         Err(e) => println!("Fail! {}", e),
     }
 }
@@ -70,20 +79,18 @@ fn build_html_body(md_lines: Vec<&str>) -> String {
     md_lines
         .iter()
         .map(|line| String::from(*line).trim().to_string())
-        .map(|line| {
-            match line {
-                _ if line.is_empty() => String::from("<br/>\n"),
-                _ if line.starts_with("#") => {
-                    let mut h:usize = 0;
-                    let mut chars = line.chars();
-                    while chars.next() == Some('#') && h < 6 {
-                        h += 1;
-                    }
-                    format!("<h{}>{}</h{}>\n", h, line[h..].to_string().trim(), h).to_string()
-                },
-                _ if line.starts_with("---") => String::from("<hr/>\n"),
-                _ => format!("<p>{line}</p>\n"),
+        .map(|line| match line {
+            _ if line.is_empty() => String::from("<br/>\n"),
+            _ if line.starts_with("#") => {
+                let mut h: usize = 0;
+                let mut chars = line.chars();
+                while chars.next() == Some('#') && h < 6 {
+                    h += 1;
+                }
+                format!("<h{}>{}</h{}>\n", h, line[h..].to_string().trim(), h).to_string()
             }
+            _ if line.starts_with("---") => String::from("<hr/>\n"),
+            _ => format!("<p>{line}</p>\n"),
         })
         .collect()
 }
