@@ -227,7 +227,7 @@ fn set_up_key(home_dir: &String) -> locker::PasswordLocker {
 
     let cipher = Cipher::aes_256_cbc();
     let encrypted = encrypt(cipher, &key, Some(&iv), TEST_STRING).expect("failed to encrypt");
-    println!("writing too {home_dir}...");
+    println!("writing to {home_dir}...");
     fs::write(format!("{home_dir}/encrypted.bin"), &encrypted).expect("failed to encrypt");
     locker::PasswordLocker { key, salt, iv }
 }
