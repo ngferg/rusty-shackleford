@@ -1,3 +1,5 @@
+use std::usize;
+
 fn main() {
     println!("Hello, world!");
 
@@ -17,6 +19,16 @@ fn main() {
 
     println!("is even? {}, {}", 2, is_even(2));
     println!("is even? {}, {}", 3, is_even(3));
+
+    let search_me = vec![1, 3, 5, 7, 9, 11, 13, 15, 17, 19];
+
+    println!("Binary search: {:?} found {} at {:?}", search_me, 1, binary_search(&search_me, 1));
+    println!("Binary search: {:?} found {} at {:?}", search_me, 5, binary_search(&search_me, 5));
+    println!("Binary search: {:?} found {} at {:?}", search_me, 19, binary_search(&search_me, 19));
+    println!("Binary search: {:?} don't find {} {:?}", search_me, 2, binary_search(&search_me, 2));
+    println!("Binary search: {:?} don't find {} {:?}", search_me, -2, binary_search(&search_me, -2));
+    println!("Binary search: {:?} don't find {} {:?}", search_me, 200, binary_search(&search_me, 200));
+
 }
 
 fn show_ownership() {
@@ -60,5 +72,32 @@ fn add(a: i32, b: i32) -> i32 { // `->` specifies return type
 
 fn is_even(num: i32) -> bool {
     return num % 2 == 0
+}
+
+/// assumes sorted vec
+fn binary_search(arr: &Vec<i64>, target: i64) -> Option<usize> {
+    let len = arr.len();
+    if len == 0 {
+        return None
+    }
+
+    let mut left: usize = 0;
+    let mut right = len - 1;
+
+    while left < right {
+        let mid = (left + right) / 2;
+        if arr[mid] == target {
+            return Some(mid);
+        } else if arr[mid] < target {
+            left = mid + 1;
+        } else {
+            right = mid - 1;
+        }
+    }
+    if arr[left] == target {
+        Some(left)
+    } else {
+        None 
+    }
 }
 
