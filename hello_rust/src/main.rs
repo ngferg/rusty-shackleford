@@ -74,7 +74,7 @@ fn is_even(num: i32) -> bool {
     return num % 2 == 0
 }
 
-/// assumes sorted vec
+/// assumes sorted asc vec
 fn binary_search(arr: &Vec<i64>, target: i64) -> Option<usize> {
     let len = arr.len();
     if len == 0 {
